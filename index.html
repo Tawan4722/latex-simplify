@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LaTeX Math Editor & Formula Composer</title>
+  
+  <!-- Google Fonts: Inter for UI, Fira Code for LaTeX code, Outfit for headers -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  
+  <!-- KaTeX CSS for beautiful math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="glow-bg"></div>
+  
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <span class="logo-icon">∫</span>
+        <h1>LaTeX Simplify</h1>
+      </div>
+      <p class="tagline">Compose math formulas and export perfect LaTeX instantly.</p>
+    </header>
+
+    <main class="main-layout">
+      <!-- Left Column: Previews and Inputs -->
+      <section class="editor-section">
+        <!-- Live Render Panel -->
+        <div class="card preview-card">
+          <div class="card-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <h2>Math Preview</h2>
+            <button id="clear-btn" class="icon-btn btn-secondary" title="Clear Editor">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Clear
+            </button>
+          </div>
+          <div class="card-body">
+            <div id="math-preview" class="katex-container">
+              <span class="placeholder-text">Your rendered formula will appear here...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formula Text Editor -->
+        <div class="card editor-card">
+          <div class="card-header">
+            <h2>Formula Editor</h2>
+            <span class="badge">LaTeX / Shorthand</span>
+          </div>
+          <div class="card-body">
+            <textarea id="formula-input" placeholder="Type LaTeX directly or use the keypad below... e.g. \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}" autofocus></textarea>
+          </div>
+        </div>
+
+        <!-- LaTeX Code Output Panel -->
+        <div class="card code-card">
+          <div class="card-header">
+            <h2>LaTeX Code</h2>
+            <button id="copy-btn" class="btn btn-primary">
+              <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+              </svg>
+              <span class="btn-text">Copy LaTeX</span>
+            </button>
+          </div>
+          <div class="card-body">
+            <pre><code id="latex-output" class="language-latex">\text{Your formula is empty}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Scientific Keypad -->
+      <section class="keypad-section">
+        <div class="card keypad-card">
+          <div class="keypad-tabs">
+            <button class="tab-btn active" data-tab="basic">Basic</button>
+            <button class="tab-btn" data-tab="calculus">Calculus</button>
+            <button class="tab-btn" data-tab="greek">Greek</button>
+            <button class="tab-btn" data-tab="symbols">Symbols</button>
+            <button class="tab-btn" data-tab="advanced">Advanced</button>
+          </div>
+          
+          <div class="card-body keypad-container">
+            <!-- Basic Math Tab -->
+            <div id="tab-basic" class="tab-pane active">
+              <div class="key-grid">
+                <button class="key math-key" data-insert="+" title="Addition">+</button>
+                <button class="key math-key" data-insert="-" title="Subtraction">−</button>
+                <button class="key math-key" data-insert="\times" title="Multiplication">×</button>
+                <button class="key math-key" data-insert="\div" title="Division">÷</button>
+                <button class="key math-key" data-insert="^2" title="Square">x²</button>
+                <button class="key math-key" data-insert="^{?}" data-select-offset="-2" data-select-length="1" title="Power">x<sup>y</sup></button>
+                <button class="key math-key" data-insert="\sqrt{?}" data-select-offset="-2" data-select-length="1" title="Square Root">√x</button>
+                <button class="key math-key" data-insert="\sqrt[?]{?}" data-select-offset="-5" data-select-length="1" title="N-th Root"><sup>n</sup>√x</button>
+                <button class="key math-key" data-insert="\frac{?}{?}" data-select-offset="-5" data-select-length="1" title="Fraction"><sup>a</sup>/<sub>b</sub></button>
+                <button class="key math-key" data-insert="_{?}" data-select-offset="-2" data-select-length="1" title="Subscript">x<sub>y</sub></button>
+                <button class="key math-key" data-insert="(" title="Left Parenthesis">(</button>
+                <button class="key math-key" data-insert=")" title="Right Parenthesis">)</button>
+                <button class="key math-key" data-insert="\pi" title="Pi">π</button>
+                <button class="key math-key" data-insert="e" title="Euler's Constant">e</button>
+                <button class="key math-key" data-insert="\ln\left(?\right)" data-select-offset="-7" data-select-length="1" title="Natural Logarithm">ln</button>
+                <button class="key math-key" data-insert="\log_{?}\left(?\right)" data-select-offset="-10" data-select-length="1" title="Logarithm">log</button>
+                <button class="key math-key" data-insert="\sin\left(?\right)" data-select-offset="-7" data-select-length="1" title="Sine">sin</button>
+                <button class="key math-key" data-insert="\cos\left(?\right)" data-select-offset="-7" data-select-length="1" title="Cosine">cos</button>
+                <button class="key math-key" data-insert="\tan\left(?\right)" data-select-offset="-7" data-select-length="1" title="Tangent">tan</button>
+                <button class="key math-key" data-insert="\theta" title="Theta">θ</button>
+              </div>
+            </div>
+
+            <!-- Calculus Tab -->
+            <div id="tab-calculus" class="tab-pane">
+              <div class="key-grid">
+                <button class="key math-key" data-insert="\int_{?}^{?}{?}" data-select-offset="-10" data-select-length="1" title="Definite Integral">∫<sub>a</sub><sup>b</sup></button>
+                <button class="key math-key" data-insert="\int {?}" data-select-offset="-2" data-select-length="1" title="Indefinite Integral">∫</button>
+                <button class="key math-key" data-insert="\oint" title="Contour Integral">⨖</button>
+                <button class="key math-key" data-insert="\frac{d}{d?}" data-select-offset="-2" data-select-length="1" title="Derivative">d/dx</button>
+                <button class="key math-key" data-insert="\frac{\partial}{\partial ?}" data-select-offset="-2" data-select-length="1" title="Partial Derivative">∂/∂x</button>
+                <button class="key math-key" data-insert="\lim_{? \to ?}" data-select-offset="-10" data-select-length="1" title="Limit">lim</button>
+                <button class="key math-key" data-insert="\sum_{?}^{?}{?}" data-select-offset="-10" data-select-length="1" title="Summation">∑</button>
+                <button class="key math-key" data-insert="\prod_{?}^{?}{?}" data-select-offset="-10" data-select-length="1" title="Product">∏</button>
+                <button class="key math-key" data-insert="\nabla" title="Nabla / Del">∇</button>
+                <button class="key math-key" data-insert="\infty" title="Infinity">∞</button>
+                <button class="key math-key" data-insert="\Delta" title="Delta (capital)">Δ</button>
+                <button class="key math-key" data-insert="\delta" title="Delta (lowercase)">δ</button>
+                <button class="key math-key" data-insert="dx" title="dx">dx</button>
+                <button class="key math-key" data-insert="dy" title="dy">dy</button>
+                <button class="key math-key" data-insert="\to" title="Right Arrow">→</button>
+                <button class="key math-key" data-insert="\prime" title="Prime (derivative)">′</button>
+              </div>
+            </div>
+
+            <!-- Greek Letters Tab -->
+            <div id="tab-greek" class="tab-pane">
+              <div class="key-grid greek-grid">
+                <button class="key math-key" data-insert="\alpha" title="Alpha">α</button>
+                <button class="key math-key" data-insert="\beta" title="Beta">β</button>
+                <button class="key math-key" data-insert="\gamma" title="Gamma">γ</button>
+                <button class="key math-key" data-insert="\delta" title="Delta">δ</button>
+                <button class="key math-key" data-insert="\epsilon" title="Epsilon">ε</button>
+                <button class="key math-key" data-insert="\zeta" title="Zeta">ζ</button>
+                <button class="key math-key" data-insert="\eta" title="Eta">η</button>
+                <button class="key math-key" data-insert="\theta" title="Theta">θ</button>
+                <button class="key math-key" data-insert="\iota" title="Iota">ι</button>
+                <button class="key math-key" data-insert="\kappa" title="Kappa">κ</button>
+                <button class="key math-key" data-insert="\lambda" title="Lambda">λ</button>
+                <button class="key math-key" data-insert="\mu" title="Mu">μ</button>
+                <button class="key math-key" data-insert="\nu" title="Nu">ν</button>
+                <button class="key math-key" data-insert="\xi" title="Xi">ξ</button>
+                <button class="key math-key" data-insert="\pi" title="Pi">π</button>
+                <button class="key math-key" data-insert="\rho" title="Rho">ρ</button>
+                <button class="key math-key" data-insert="\sigma" title="Sigma">σ</button>
+                <button class="key math-key" data-insert="\tau" title="Tau">τ</button>
+                <button class="key math-key" data-insert="\phi" title="Phi">φ</button>
+                <button class="key math-key" data-insert="\chi" title="Chi">χ</button>
+                <button class="key math-key" data-insert="\psi" title="Psi">ψ</button>
+                <button class="key math-key" data-insert="\omega" title="Omega">ω</button>
+                <button class="key math-key" data-insert="\Sigma" title="Capital Sigma">Σ</button>
+                <button class="key math-key" data-insert="\Omega" title="Capital Omega">Ω</button>
+              </div>
+            </div>
+
+            <!-- Symbols Tab -->
+            <div id="tab-symbols" class="tab-pane">
+              <div class="key-grid">
+                <button class="key math-key" data-insert="=" title="Equals">=</button>
+                <button class="key math-key" data-insert="\neq" title="Not Equal">≠</button>
+                <button class="key math-key" data-insert="<" title="Less Than">&lt;</button>
+                <button class="key math-key" data-insert=">" title="Greater Than">&gt;</button>
+                <button class="key math-key" data-insert="\leq" title="Less Than or Equal">≤</button>
+                <button class="key math-key" data-insert="\geq" title="Greater Than or Equal">≥</button>
+                <button class="key math-key" data-insert="\approx" title="Approximately Equal">≈</button>
+                <button class="key math-key" data-insert="\propto" title="Proportional To">∝</button>
+                
+                <button class="key math-key" data-insert="\pm" title="Plus-Minus">±</button>
+                <button class="key math-key" data-insert="\mp" title="Minus-Plus">∓</button>
+                <button class="key math-key" data-insert="\in" title="Element Of">∈</button>
+                <button class="key math-key" data-insert="\notin" title="Not Element Of">∉</button>
+                <button class="key math-key" data-insert="\subset" title="Subset Of">⊂</button>
+                <button class="key math-key" data-insert="\subseteq" title="Subset or Equal">⊆</button>
+                <button class="key math-key" data-insert="\cup" title="Union">∪</button>
+                <button class="key math-key" data-insert="\cap" title="Intersection">∩</button>
+                
+                <button class="key math-key" data-insert="\forall" title="For All">∀</button>
+                <button class="key math-key" data-insert="\exists" title="Exists">∃</button>
+                <button class="key math-key" data-insert="\nexists" title="Does Not Exist">∄</button>
+                <button class="key math-key" data-insert="\emptyset" title="Empty Set">∅</button>
+                <button class="key math-key" data-insert="\therefore" title="Therefore">∴</button>
+                <button class="key math-key" data-insert="\because" title="Because">∵</button>
+                <button class="key math-key" data-insert="!" title="Factorial">!</button>
+                <button class="key math-key" data-insert="?" title="Blank Template">?</button>
+              </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div id="tab-advanced" class="tab-pane">
+              <div class="key-grid">
+                <button class="key math-key" data-insert="\begin{matrix} ? & ? \\ ? & ? \end{matrix}" data-select-offset="-31" data-select-length="1" title="Matrix">Matrix</button>
+                <button class="key math-key" data-insert="\begin{pmatrix} ? & ? \\ ? & ? \end{pmatrix}" data-select-offset="-33" data-select-length="1" title="Matrix with parentheses">Matrix (p)</button>
+                <button class="key math-key" data-insert="\begin{bmatrix} ? & ? \\ ? & ? \end{bmatrix}" data-select-offset="-33" data-select-length="1" title="Matrix with brackets">Matrix [b]</button>
+                <button class="key math-key" data-insert="\det\begin{vmatrix} ? & ? \\ ? & ? \end{vmatrix}" data-select-offset="-33" data-select-length="1" title="Determinant">Determinant</button>
+                
+                <button class="key math-key" data-insert="\vec{?}" data-select-offset="-2" data-select-length="1" title="Vector arrow">Vector</button>
+                <button class="key math-key" data-insert="\bar{?}" data-select-offset="-2" data-select-length="1" title="Overline/Bar">Bar</button>
+                <button class="key math-key" data-insert="\hat{?}" data-select-offset="-2" data-select-length="1" title="Hat">Hat</button>
+                <button class="key math-key" data-insert="\dot{?}" data-select-offset="-2" data-select-length="1" title="Dot derivative">Dot</button>
+                
+                <button class="key math-key" data-insert="\hbar" title="Reduced Planck Constant">ħ</button>
+                <button class="key math-key" data-insert="\mu_0" title="Permeability of free space">μ₀</button>
+                <button class="key math-key" data-insert="\epsilon_0" title="Permittivity of free space">ε₀</button>
+                <button class="key math-key" data-insert="c" title="Speed of Light">c</button>
+
+                <button class="key math-key" data-insert="G" title="Gravitational Constant">G</button>
+                <button class="key math-key" data-insert="k_B" title="Boltzmann Constant">k_B</button>
+                <button class="key math-key" data-insert="N_A" title="Avogadro's Constant">N_A</button>
+                <button class="key math-key" data-insert="h" title="Planck Constant">h</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <footer class="app-footer">
+      <p>&copy; 2026 LaTeX Simplify. Designed for Researchers & Students.</p>
+    </footer>
+  </div>
+
+  <!-- Notification Toast for Copied Status -->
+  <div id="toast" class="toast">
+    <div class="toast-content">
+      <svg class="toast-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span id="toast-message">LaTeX copied to clipboard!</span>
+    </div>
+  </div>
+
+  <!-- KaTeX JavaScript dependencies -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  
+  <!-- Custom Logic Script -->
+  <script src="app.js" defer></script>
+</body>
+</html>
